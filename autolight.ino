@@ -11,15 +11,20 @@
  * D4 = debug sw
 */
 
-int ledPin = 13;
-int ldrPin = A0;
-int pirPin1 = 2;
-int debugPin = 4;
-int relayPin1 = 6;
-int relayPin2 = 8;
+#define ledPin 13
+#define ldrPin A0
+#define pirPin1 2
+#define debugPin 4
+#define relayPin1 6
+#define relayPin2 8
 
-int uplimit = 920;
-int lowlimit = 860;
+// Value reading from LDR via A0 pin to trig Light on/off
+int uplimit = 920; // value to turn off light in Morning
+int lowlimit = 860; // value to turn on light in Evening
+
+// Active Hour
+int Morning = 5;
+int Evening = 18;
 
 int var = 0;
 bool dark = false;
@@ -112,17 +117,17 @@ void checkTime()
   readDS3231time(&second, &minute, &hour, &dayOfWeek, &dayOfMonth, &month,
   &year);
 
-  if ((hour > 5) and (hour < 18)) {
+  if ((hour > Morning) and (hour < Evening)) {
      night = false;
      willnight = true;
      debugMsg("Day time (06:00-17:59): night=false, willnight=true");
   }
-  if ((hour > 18) or (hour < 5)) {
+  if ((hour > Evening) or (hour < Morning)) {
      night = true;
      willday = true;
      debugMsg("Night time (19:00-04:59): night=true, willday=true");
   }
-  if ((hour == 5) and willday) {
+  if ((hour == Morning) and willday) {
      debugMsg("Morning time (05:xx): ", false);
      if (checkLight() < uplimit) {
          dark = false;
@@ -140,7 +145,7 @@ void checkTime()
         debugMsg("LDR Dark, Turn Light ON, night=true");
      }
   }
-  if ((hour == 18) and willnight) {
+  if ((hour == Evening) and willnight) {
      debugMsg("Evening time (18:xx): ", false);
      if (checkLight() > lowlimit) {
          dark = true;
